@@ -20,47 +20,75 @@ export default class LiveProvider extends Component {
     noInline: PropTypes.bool,
     scope: PropTypes.object,
     theme: PropTypes.object,
-    transformCode: PropTypes.node
+    transformCode: PropTypes.node,
+    transpileOptions: PropTypes.object
   };
 
   // eslint-disable-next-line camelcase
   UNSAFE_componentWillMount() {
-    const { code, scope, transformCode, noInline } = this.props;
+    const {
+      code,
+      scope,
+      transformCode,
+      noInline,
+      transpileOptions
+    } = this.props;
 
-    this.transpile({ code, scope, transformCode, noInline });
+    this.transpile({ code, scope, transformCode, noInline, transpileOptions });
   }
 
   componentDidUpdate({
     code: prevCode,
     scope: prevScope,
     noInline: prevNoInline,
-    transformCode: prevTransformCode
+    transformCode: prevTransformCode,
+    transpileOptions: prevTranspileOptions
   }) {
-    const { code, scope, noInline, transformCode } = this.props;
+    const {
+      code,
+      scope,
+      noInline,
+      transformCode,
+      transpileOptions
+    } = this.props;
     if (
       code !== prevCode ||
       scope !== prevScope ||
       noInline !== prevNoInline ||
-      transformCode !== prevTransformCode
+      transformCode !== prevTransformCode ||
+      transpileOptions !== prevTranspileOptions
     ) {
-      this.transpile({ code, scope, transformCode, noInline });
+      this.transpile({
+        code,
+        scope,
+        transformCode,
+        noInline,
+        transpileOptions
+      });
     }
   }
 
   onChange = code => {
-    const { scope, transformCode, noInline } = this.props;
-    this.transpile({ code, scope, transformCode, noInline });
+    const { scope, transformCode, noInline, transpileOptions } = this.props;
+    this.transpile({ code, scope, transformCode, transpileOptions, noInline });
   };
 
   onError = error => {
     this.setState({ error: error.toString() });
   };
 
-  transpile = ({ code, scope, transformCode, noInline = false }) => {
+  transpile = ({
+    code,
+    scope,
+    transformCode,
+    transpileOptions,
+    noInline = false
+  }) => {
     // Transpilation arguments
     const input = {
       code: transformCode ? transformCode(code) : code,
-      scope
+      scope,
+      transpileOptions
     };
 
     const errorCallback = err =>
